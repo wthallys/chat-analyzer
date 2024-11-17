@@ -28,12 +28,15 @@ def classificar_periodo(hora):
     else:
         return "Noite"
 
-def contar_mensagens(arquivo, participantes):
+def contar_mensagens(arquivo):
     # Dicionário para contar o número de mensagens por participante
     contagem = defaultdict(int)
     
     # Dicionário para contar o número de mensagens por período
     periodos = defaultdict(int)
+
+    # Dicionário para identificar participantes
+    participantes = set()
 
     try:
         # Abrindo o arquivo .txt
@@ -52,15 +55,17 @@ def contar_mensagens(arquivo, participantes):
                 match = re.match(r"(\d{1,2}/\d{1,2}/\d{2,4}, \d{1,2}:\d{2} [APM]{2}) - ([^:]+):", linha_limpa)
                 
                 if match:
-                    # Extraindo hora e nome da linha
+                    # Extraindo hora, nome e mensagem
                     hora_str = match.group(1).split(',')[1].strip()  # Pegando apenas a parte da hora
                     hora = datetime.strptime(hora_str, '%I:%M %p')
                     nome = match.group(2).strip()  # Nome do participante
                     mensagem = linha_limpa[match.end():].strip()  # Captura a mensagem após o nome
                     
-                    # Verifica se o nome do participante está na lista
-                    if nome in participantes:
-                        contagem[nome] += 1
+                    # Adiciona o nome do participante ao conjunto de participantes
+                    participantes.add(nome)
+                    
+                    # Conta as mensagens por participante
+                    contagem[nome] += 1
                     
                     # Classifica a hora da mensagem no período correto
                     periodo = classificar_periodo(hora)
@@ -95,11 +100,8 @@ def contar_mensagens(arquivo, participantes):
     except Exception as e:
         print(f"Erro inesperado: {e}")
 
-# Lista de participantes
-participantes = ['nomes']
-
 # Caminho para o arquivo de mensagens
 arquivo = 'mensagens.txt'
 
 # Chama a função para contar as mensagens
-contar_mensagens(arquivo, participantes)
+contar_mensagens(arquivo)
